@@ -41,10 +41,15 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // NOMBRE DE LA COLECCIÓN (V20: Versión limpia y verificada)
-const COLLECTION_NAME = "tasks_prod_v22";
+const COLLECTION_NAME = "tasks_prod_v23";
 
-// --- 2. CONFIGURACIÓN DE FECHAS ---
-const d = (day: number, hour: number, minute: number) => new Date(2026, 1, day, hour, minute);
+// --- 2. CONFIGURACIÓN DE FECHAS (FIX ZONA HORARIA) ---
+
+// 1. Crear fechas forzando UTC (Para que 7:00 sea 7:00 en China o en Chile)
+const d = (day: number, hour: number, minute: number) => {
+  // Date.UTC crea la fecha en tiempo universal, sin restar las 3 horas de Chile
+  return new Date(Date.UTC(2026, 1, day, hour, minute));
+};
 
 const safeDate = (val: any): Date => {
   if (!val) return new Date(); 
@@ -52,14 +57,24 @@ const safeDate = (val: any): Date => {
   return new Date(val);
 };
 
+// 2. Formateador que OBLIGA a leer en UTC (Ignora la hora del celular)
 const formatTime = (date: Date) => {
   if (!date || isNaN(date.getTime())) return "--:--";
-  return date.toLocaleTimeString('es-CL', { hour: '2-digit', minute:'2-digit', hour12: false });
+  return date.toLocaleTimeString('es-CL', { 
+    hour: '2-digit', 
+    minute:'2-digit', 
+    hour12: false,
+    timeZone: 'UTC' // <--- CLAVE: Esto evita que el celular cambie la hora
+  });
 };
 
 const formatDay = (date: Date) => {
   if (!date || isNaN(date.getTime())) return "---";
-  return date.toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric' });
+  return date.toLocaleDateString('es-CL', { 
+    weekday: 'short', 
+    day: 'numeric',
+    timeZone: 'UTC' // <--- CLAVE: Mantiene el día fijo aunque sean las 00:00
+  });
 };
 
 // --- 3. DATOS SEMILLA REALES (111 TAREAS E&I) ---
