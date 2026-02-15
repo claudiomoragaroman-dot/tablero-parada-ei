@@ -41,7 +41,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // NOMBRE DE LA COLECCIÓN (V20: Versión limpia y verificada)
-const COLLECTION_NAME = "tasks_prod_v24";
+const COLLECTION_NAME = "tasks_prod_v25";
 
 // --- 2. CONFIGURACIÓN DE FECHAS (FIX ZONA HORARIA) ---
 
@@ -57,23 +57,67 @@ const safeDate = (val: any): Date => {
   return new Date(val);
 };
 
-// 2. Formateador que OBLIGA a leer en UTC (Ignora la hora del celular)
+// --- 2. CONFIGURACIÓN DE FECHAS (FIX ZONA HORARIA ROBUSTO) ---
+
+// Crear fechas forzando UTC 
+const d = (day: number, hour: number, minute: number) => {
+  return new Date(Date.UTC(2026, 1, day, hour, minute));
+};
+
+const safeDate = (val: any): Date => {
+  if (!val) return new Date(); 
+  if (val.toDate && typeof val.toDate === 'function') return val.toDate();
+  return new Date(val);
+};
+
+// Función ROBUSTA para obtener la hora de Chile proyectada a 2026
+// Usa Intl.DateTimeFormat para funcionar bien en iPhone/Safari
+const getChileTime2026 = () => {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Santiago',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: false
+  });
+
+  // Extraer partes de la fecha en Chile
+  const parts = formatter.formatToParts(now);
+  const getPart = (type: string) => parseInt(parts.find(p => p.type === type)?.value || '0');
+
+  // Construir fecha UTC fija en 2026 usando la hora chilena actual
+  return new Date(Date.UTC(
+    2026, 
+    1, // Febrero es 1
+    getPart('day'), 
+    getPart('hour'), 
+    getPart('minute'), 
+    getPart('second')
+  ));
+};
+
+// Formateadores que fuerzan lectura UTC (ignoran hora del celular)
 const formatTime = (date: Date) => {
   if (!date || isNaN(date.getTime())) return "--:--";
   return date.toLocaleTimeString('es-CL', { 
     hour: '2-digit', 
     minute:'2-digit', 
     hour12: false,
-    timeZone: 'UTC' // <--- CLAVE: Esto evita que el celular cambie la hora
+    timeZone: 'UTC'
   });
 };
 
 const formatDay = (date: Date) => {
   if (!date || isNaN(date.getTime())) return "---";
+  // Usamos 'long' para que diga "lunes" en vez de "lun"
   return date.toLocaleDateString('es-CL', { 
-    weekday: 'short', 
+    weekday: 'long', 
     day: 'numeric',
-    timeZone: 'UTC' // <--- CLAVE: Mantiene el día fijo aunque sean las 00:00
+    timeZone: 'UTC'
   });
 };
 
@@ -238,25 +282,35 @@ export default function App() {
   // Helper: Obtener hora actual de Chile proyectada a 2026 UTC
   const getChileTime2026 = () => {
     const now = new Date();
-    // Forzamos la zona horaria de Chile
-    const chileTime = new Date(now.toLocaleString("en-US", { timeZone: "America/Santiago" }));
-    
-    // Construimos la fecha en UTC conservando los números de la hora chilena
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Santiago',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false
+    });
+
+    const parts = formatter.formatToParts(now);
+    const getPart = (type: string) => parseInt(parts.find(p => p.type === type)?.value || '0');
+
     return new Date(Date.UTC(
       2026, 
       1, // Febrero fijo
-      chileTime.getDate(), 
-      chileTime.getHours(), 
-      chileTime.getMinutes(), 
-      chileTime.getSeconds()
+      getPart('day'), 
+      getPart('hour'), 
+      getPart('minute'), 
+      getPart('second')
     ));
   };
 
   const [currentTime, setCurrentTime] = useState<Date>(getChileTime2026);
   const [search, setSearch] = useState('');
   const [filterArea, setFilterArea] = useState('Todas');
-  const [sortBy, setSortBy] = useState<'id' | 'time'>('time');
-
+  const [sortBy, setSortBy] = useState<'id' | 'time'>('time');  
+  
   // --- 4. RELOJ REAL (Sincronizado Chile -> 2026 UTC) ---
   useEffect(() => {
     const interval = setInterval(() => {
