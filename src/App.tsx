@@ -448,10 +448,10 @@ export default function App() {
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Activity className="h-8 w-8 text-blue-400 flex-shrink-0" />
           <div>
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white" style={{ color: '#ffffff' }}>Tablero E&I: Detención 17 Feb</h1>
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white" style={{ color: '#ffffff' }}>Tablero E&I: Detención 17 - 19 Feb 2026 - 45 hrs</h1>
             <p className="text-xs text-slate-400 font-mono flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              SISTEMA EN LÍNEA • {formatDay(currentTime)}
+              EN LÍNEA • {formatDay(currentTime)}
             </p>
           </div>
         </div>
