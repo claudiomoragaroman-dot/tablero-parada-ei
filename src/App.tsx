@@ -9,16 +9,9 @@ import {
   Zap, 
   Save, 
   GitMerge, 
-  Wifi, 
-  MoreHorizontal,
-  Loader2,
-  Filter,
-  Layers,
-  ArrowUpDown, 
-  Calendar, 
+  Loader2,  
   Hash,
-  ListFilter // Icono para el título de ordenar
-} from 'lucide-react';
+  } from 'lucide-react';
 
 // --- IMPORTACIONES FIREBASE ---
 import { initializeApp, getApps, getApp } from "firebase/app";
@@ -28,8 +21,7 @@ import {
   onSnapshot, 
   doc, 
   updateDoc, 
-  writeBatch,
-  setDoc
+  writeBatch  
 } from 'firebase/firestore';
 import { getAuth, signInAnonymously } from "firebase/auth";
 
@@ -49,7 +41,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // NOMBRE DE LA COLECCIÓN (V11: PARA FORZAR LIMPIEZA Y RECARGA)
-const COLLECTION_NAME = "tasks_prod_v11";
+const COLLECTION_NAME = "tasks_prod_v17";
 
 // --- 2. CONFIGURACIÓN DE FECHAS ---
 const d = (day: number, hour: number, minute: number) => new Date(2026, 1, day, hour, minute);
@@ -71,7 +63,6 @@ const formatDay = (date: Date) => {
 };
 
 // --- 3. DATOS SEMILLA REALES (SOLO TAREAS E&I) ---
-// Esta lista se cargará automáticamente si la colección está vacía
 const INITIAL_TASKS_DATA = [
   // CHUTE 7 / SENSORES POLEA MOTRIZ
   { area: "Seca", id: "4", ot: "793212", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Bloqueo de equipo ", start: d(17,7,0), end: d(17,7,30), resp: "Rodrigo Muñoz" },
@@ -261,7 +252,7 @@ export default function App() {
     };
     initAuth();
 
-    // ESCUCHAR CAMBIOS EN LA COLECCIÓN V14
+    // ESCUCHAR CAMBIOS EN LA COLECCIÓN "tasks_prod_v15"
     const unsubscribe = onSnapshot(collection(db, COLLECTION_NAME), 
       (snapshot) => {
         if (snapshot.empty) {
@@ -341,28 +332,26 @@ export default function App() {
     return { total: tasks.length, completed, delayed, inProgress, realProgressPercent };
   }, [tasks, currentTime]);
 
-  // FILTRO Y ORDENAMIENTO
-  const processedTasks = useMemo(() => {
-    let result = tasks.filter(t => {
-      const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase()) || 
-                            t.ot.includes(search) ||
-                            t.resp.toLowerCase().includes(search.toLowerCase()) ||
-                            t.parent.toLowerCase().includes(search.toLowerCase());
-      const matchesArea = filterArea === 'Todas' || t.area === filterArea;
-      return matchesSearch && matchesArea;
-    });
+  // FILTRO COMBINADO: Búsqueda + Área
+  const filteredTasks = tasks.filter(t => {
+    const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase()) || 
+                          t.ot.includes(search) ||
+                          t.resp.toLowerCase().includes(search.toLowerCase()) ||
+                          t.parent.toLowerCase().includes(search.toLowerCase());
+    const matchesArea = filterArea === 'Todas' || t.area === filterArea;
+    return matchesSearch && matchesArea;
+  });
 
-    // Ordenar
-    result.sort((a, b) => {
+  // Ordenamiento
+  const processedTasks = useMemo(() => {
+    return filteredTasks.sort((a, b) => {
       if (sortBy === 'time') {
         const timeDiff = safeDate(a.start).getTime() - safeDate(b.start).getTime();
         if (timeDiff !== 0) return timeDiff;
       }
       return parseInt(a.id) - parseInt(b.id);
     });
-
-    return result;
-  }, [tasks, search, filterArea, sortBy]);
+  }, [filteredTasks, sortBy]);
 
 
   // --- RENDER HELPERS ---
@@ -435,7 +424,7 @@ export default function App() {
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Activity className="h-8 w-8 text-blue-400 flex-shrink-0" />
           <div>
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white" style={{ color: '#ffffff' }}>Tablero E&I: Detención 17 - 19 Feb 2026 - 45 hrs</h1>
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white" style={{ color: '#ffffff' }}>Tablero E&I: Detención 17 - 19 Feb 2026 - 45 hrs.</h1>
             <p className="text-xs text-slate-400 font-mono flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
               EN LÍNEA • {formatDay(currentTime)}
@@ -510,7 +499,7 @@ export default function App() {
                   <span className="bg-slate-200 text-slate-600 text-xs py-1 px-2 rounded-full">{processedTasks.length}</span>
                 </h3>
                 
-                {/* BOTONES DE ORDENAMIENTO (NUEVO Y MEJORADO) */}
+                {/* BOTONES DE ORDENAMIENTO */}
                 <div className="flex items-center gap-2 ml-auto sm:ml-4 bg-slate-100 p-1 rounded-lg border border-slate-200">
                    <span className="text-[10px] font-bold text-slate-400 uppercase px-2 hidden sm:block">Ordenar:</span>
                    <button
@@ -562,7 +551,7 @@ export default function App() {
           </div>
 
           <div className="flex-1 overflow-auto bg-slate-50/50">
-            {/* VISTA MÓVIL: TARJETAS */}
+            {/* MÓVIL */}
             <div className="md:hidden p-3 space-y-3">
               {processedTasks.map(task => {
                 const status = getTaskStatus(task, currentTime.getTime());
@@ -581,7 +570,6 @@ export default function App() {
                     <div>
                       <div className="text-[10px] font-bold text-blue-600 uppercase tracking-tight mb-1 flex items-center gap-1">
                         <GitMerge size={10} /> {task.parent}
-                        {/* AREA OCULTA (NO SE RENDERIZA) */}
                       </div>
                       <h4 className="font-bold text-sm text-slate-800 leading-tight">{task.name}</h4>
                       <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
@@ -608,7 +596,7 @@ export default function App() {
               })}
             </div>
 
-            {/* VISTA ESCRITORIO: TABLA */}
+            {/* ESCRITORIO */}
             <table className="hidden md:table w-full text-left border-collapse">
               <thead className="bg-slate-100 text-slate-600 font-semibold text-xs uppercase tracking-wider sticky top-0 z-10 shadow-sm">
                 <tr>
@@ -627,13 +615,13 @@ export default function App() {
                   const status = getTaskStatus(task, currentTime.getTime());
                   return (
                     <tr key={task.id} className={`transition-colors border-l-4 ${status === 'delayed' ? 'bg-red-50 hover:bg-red-100 border-l-red-500' : status === 'in-progress' ? 'bg-blue-50 hover:bg-blue-100 border-l-blue-500' : status === 'completed' ? 'bg-green-50 opacity-70 border-l-green-500' : 'hover:bg-slate-50 border-l-transparent'}`}>
-                      {/* ID ESTILO BADGE */}
+                      {/* ID ESTILO BADGE (GRIS) */}
                       <td className="p-3 text-center border-b border-slate-100">
                          <span className="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-xs inline-block">
                            #{task.id}
                          </span>
                       </td>
-                      {/* OT ESTILO BADGE AZUL */}
+                      {/* OT ESTILO BADGE (AZUL) */}
                       <td className="p-3 text-center border-b border-slate-100">
                          <span className="bg-blue-50 text-blue-700 font-bold px-2 py-1 rounded text-xs inline-block font-mono">
                            {task.ot}
