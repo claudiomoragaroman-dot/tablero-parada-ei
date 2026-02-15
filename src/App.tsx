@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Activity, 
   AlertTriangle, 
@@ -40,8 +40,8 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// NOMBRE DE LA COLECCIÓN (V17: Limpieza de imports no usados)
-const COLLECTION_NAME = "tasks_prod_v17";
+// NOMBRE DE LA COLECCIÓN (V18: PARA LIMPIEZA FINAL Y ARREGLO DE ERRORES)
+const COLLECTION_NAME = "tasks_prod_v18";
 
 // --- 2. CONFIGURACIÓN DE FECHAS ---
 const d = (day: number, hour: number, minute: number) => new Date(2026, 1, day, hour, minute);
@@ -224,7 +224,7 @@ export default function App() {
     };
     initAuth();
 
-    // ESCUCHAR CAMBIOS EN LA COLECCIÓN V17
+    // ESCUCHAR CAMBIOS EN LA COLECCIÓN V18
     const unsubscribe = onSnapshot(collection(db, COLLECTION_NAME), 
       (snapshot) => {
         if (snapshot.empty) {
@@ -304,26 +304,28 @@ export default function App() {
     return { total: tasks.length, completed, delayed, inProgress, realProgressPercent };
   }, [tasks, currentTime]);
 
-  // FILTRO COMBINADO: Búsqueda + Área
-  const filteredTasks = tasks.filter(t => {
-    const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase()) || 
-                          t.ot.includes(search) ||
-                          t.resp.toLowerCase().includes(search.toLowerCase()) ||
-                          t.parent.toLowerCase().includes(search.toLowerCase());
-    const matchesArea = filterArea === 'Todas' || t.area === filterArea;
-    return matchesSearch && matchesArea;
-  });
-
-  // Ordenamiento
+  // FILTRO Y ORDENAMIENTO
   const processedTasks = useMemo(() => {
-    return filteredTasks.sort((a, b) => {
+    let result = tasks.filter(t => {
+      const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase()) || 
+                            t.ot.includes(search) ||
+                            t.resp.toLowerCase().includes(search.toLowerCase()) ||
+                            t.parent.toLowerCase().includes(search.toLowerCase());
+      const matchesArea = filterArea === 'Todas' || t.area === filterArea;
+      return matchesSearch && matchesArea;
+    });
+
+    // Ordenar
+    result.sort((a, b) => {
       if (sortBy === 'time') {
         const timeDiff = safeDate(a.start).getTime() - safeDate(b.start).getTime();
         if (timeDiff !== 0) return timeDiff;
       }
       return parseInt(a.id) - parseInt(b.id);
     });
-  }, [filteredTasks, sortBy]);
+
+    return result;
+  }, [tasks, search, filterArea, sortBy]);
 
 
   // --- RENDER HELPERS ---
@@ -582,4 +584,83 @@ export default function App() {
                   <th className="p-3 border-b border-slate-200">Actividad</th>
                   <th className="p-3 w-32 border-b border-slate-200">Estado</th>
                   <th className="p-3 w-48 text-center border-b border-slate-200">Avance</th>
-                  <th className="p-3 w-64 border-b border-slate-20
+                  <th className="p-3 w-64 border-b border-slate-200">Notas</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm divide-y divide-slate-100 bg-white">
+                {processedTasks.map(task => {
+                  const status = getTaskStatus(task, currentTime.getTime());
+                  return (
+                    <tr key={task.id} className={`transition-colors border-l-4 ${status === 'delayed' ? 'bg-red-50 hover:bg-red-100 border-l-red-500' : status === 'in-progress' ? 'bg-blue-50 hover:bg-blue-100 border-l-blue-500' : status === 'completed' ? 'bg-green-50 opacity-70 border-l-green-500' : 'hover:bg-slate-50 border-l-transparent'}`}>
+                      {/* ID ESTILO BADGE (GRIS) */}
+                      <td className="p-3 text-center border-b border-slate-100">
+                         <span className="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-xs inline-block">
+                           #{task.id}
+                         </span>
+                      </td>
+                      {/* OT ESTILO BADGE (AZUL) */}
+                      <td className="p-3 text-center border-b border-slate-100">
+                         <span className="bg-blue-50 text-blue-700 font-bold px-2 py-1 rounded text-xs inline-block font-mono">
+                           {task.ot}
+                         </span>
+                      </td>
+                      <td className="p-3 text-center text-slate-500 text-xs capitalize">{formatDay(safeDate(task.start))}</td>
+                      <td className="p-3 align-top">
+                        <div className="flex flex-col text-xs font-mono text-slate-500 font-medium">
+                          <span>{formatTime(safeDate(task.start))}</span>
+                          <span className="text-slate-300 my-0.5">↓</span>
+                          <span>{formatTime(safeDate(task.end))}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 align-top">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <GitMerge size={10} className="text-blue-500" />
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-tight bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">{task.parent}</span>
+                          {/* AREA OCULTA (NO SE RENDERIZA) */}
+                        </div>
+                        <div className="font-medium text-slate-800 mb-1">{task.name}</div>
+                        <div className="text-xs text-slate-500 flex flex-wrap gap-2 items-center">
+                          <span className="flex items-center gap-1 text-slate-500"><User size={10} /> {task.resp}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 align-top">{renderStatusBadge(task)}</td>
+                      <td className="p-3 align-middle">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div className={`h-full transition-all duration-500 ${task.progress === 100 ? 'bg-green-500' : 'bg-slate-900'}`} style={{ width: `${task.progress}%` }} />
+                          </div>
+                          {renderProgressButtons(task)}
+                        </div>
+                      </td>
+                      <td className="p-3 align-top">
+                        <div className="relative">
+                          <textarea
+                            value={task.notes || ''}
+                            onChange={(e) => updateTask(task.id, { notes: e.target.value })}
+                            placeholder="Nota..."
+                            className="w-full text-xs p-2 rounded border resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors h-16"
+                          />
+                          {task.notes && <div className="absolute bottom-2 right-2 text-green-500"><Save size={12} /></div>}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            
+            {processedTasks.length === 0 && (
+              <div className="text-center py-10 text-slate-400">
+                <Search size={40} className="mx-auto mb-2 opacity-20" />
+                <p>No se encontraron tareas con ese filtro.</p>
+              </div>
+            )}
+          </div>
+          <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-center text-slate-400">
+            Mostrando {processedTasks.length} de {tasks.length} tareas sincronizadas
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
