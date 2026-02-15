@@ -41,7 +41,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // NOMBRE DE LA COLECCIÓN (V20: Versión limpia y verificada)
-const COLLECTION_NAME = "tasks_prod_v23";
+const COLLECTION_NAME = "tasks_prod_v24";
 
 // --- 2. CONFIGURACIÓN DE FECHAS (FIX ZONA HORARIA) ---
 
@@ -235,23 +235,32 @@ export default function App() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Reloj Simulado 2026 (Para pruebas hoy)
-  const [currentTime, setCurrentTime] = useState<Date>(() => {
+  // Helper: Obtener hora actual de Chile proyectada a 2026 UTC
+  const getChileTime2026 = () => {
     const now = new Date();
-    now.setFullYear(2026);
-    return now;
-  });
-  
+    // Forzamos la zona horaria de Chile
+    const chileTime = new Date(now.toLocaleString("en-US", { timeZone: "America/Santiago" }));
+    
+    // Construimos la fecha en UTC conservando los números de la hora chilena
+    return new Date(Date.UTC(
+      2026, 
+      1, // Febrero fijo
+      chileTime.getDate(), 
+      chileTime.getHours(), 
+      chileTime.getMinutes(), 
+      chileTime.getSeconds()
+    ));
+  };
+
+  const [currentTime, setCurrentTime] = useState<Date>(getChileTime2026);
   const [search, setSearch] = useState('');
   const [filterArea, setFilterArea] = useState('Todas');
   const [sortBy, setSortBy] = useState<'id' | 'time'>('time');
 
-  // --- 4. RELOJ REAL (Forzado a 2026) ---
+  // --- 4. RELOJ REAL (Sincronizado Chile -> 2026 UTC) ---
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = new Date();
-      now.setFullYear(2026);
-      setCurrentTime(now);
+      setCurrentTime(getChileTime2026());
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -267,7 +276,7 @@ export default function App() {
     };
     initAuth();
 
-    // ESCUCHAR CAMBIOS EN LA COLECCIÓN V20
+    // ESCUCHAR CAMBIOS EN LA COLECCIÓN V22
     const unsubscribe = onSnapshot(collection(db, COLLECTION_NAME), 
       (snapshot) => {
         if (snapshot.empty) {
@@ -347,7 +356,6 @@ export default function App() {
     return { total: tasks.length, completed, delayed, inProgress, realProgressPercent };
   }, [tasks, currentTime]);
 
-  // FILTRO Y ORDENAMIENTO
   const processedTasks = useMemo(() => {
     let result = tasks.filter(t => {
       const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -358,7 +366,6 @@ export default function App() {
       return matchesSearch && matchesArea;
     });
 
-    // Ordenar
     result.sort((a, b) => {
       if (sortBy === 'time') {
         const timeDiff = safeDate(a.start).getTime() - safeDate(b.start).getTime();
@@ -441,10 +448,10 @@ export default function App() {
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Activity className="h-8 w-8 text-blue-400 flex-shrink-0" />
           <div>
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white" style={{ color: '#ffffff' }}>Tablero E&I: Detención 17 - 19 Feb 2026 - 45 hrs</h1>
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white" style={{ color: '#ffffff' }}>Tablero E&I: Detención 17 Feb</h1>
             <p className="text-xs text-slate-400 font-mono flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              EN LÍNEA • {formatDay(currentTime)}
+              SISTEMA EN LÍNEA • {formatDay(currentTime)}
             </p>
           </div>
         </div>
@@ -589,6 +596,7 @@ export default function App() {
                     <div>
                       <div className="text-[10px] font-bold text-blue-600 uppercase tracking-tight mb-1 flex items-center gap-1">
                         <GitMerge size={10} /> {task.parent}
+                        {/* AREA OCULTA, SOLO INTERNA */}
                       </div>
                       <h4 className="font-bold text-sm text-slate-800 leading-tight">{task.name}</h4>
                       <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
@@ -658,6 +666,7 @@ export default function App() {
                         <div className="flex items-center gap-1.5 mb-1">
                           <GitMerge size={10} className="text-blue-500" />
                           <span className="text-[10px] font-bold text-blue-600 uppercase tracking-tight bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">{task.parent}</span>
+                          {/* AREA OCULTA (NO SE RENDERIZA) */}
                         </div>
                         <div className="font-medium text-slate-800 mb-1">{task.name}</div>
                         <div className="text-xs text-slate-500 flex flex-wrap gap-2 items-center">
