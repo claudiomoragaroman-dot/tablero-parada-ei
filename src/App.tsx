@@ -41,7 +41,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // NOMBRE DE LA COLECCIÓN (V20: Versión limpia y verificada)
-const COLLECTION_NAME = "tasks_prod_v21";
+const COLLECTION_NAME = "tasks_prod_v22";
 
 // --- 2. CONFIGURACIÓN DE FECHAS ---
 const d = (day: number, hour: number, minute: number) => new Date(2026, 1, day, hour, minute);
