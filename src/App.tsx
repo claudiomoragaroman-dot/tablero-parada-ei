@@ -40,8 +40,8 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// NOMBRE DE LA COLECCIÓN (V24: Versión final con Timezone Chile corregido)
-const COLLECTION_NAME = "tasks_prod_v26";
+// NOMBRE DE LA COLECCIÓN (V23: Versión blindada para iPhone/Android)
+const COLLECTION_NAME = "tasks_prod_v27";
 
 // --- 2. CONFIGURACIÓN DE FECHAS (FIX ZONA HORARIA ROBUSTO) ---
 
@@ -54,36 +54,6 @@ const safeDate = (val: any): Date => {
   if (!val) return new Date(); 
   if (val.toDate && typeof val.toDate === 'function') return val.toDate();
   return new Date(val);
-};
-
-// Función ROBUSTA para obtener la hora de Chile proyectada a 2026
-// Usa Intl.DateTimeFormat para funcionar bien en iPhone/Safari
-const getChileTime2026 = () => {
-  const now = new Date();
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Santiago',
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    hour12: false
-  });
-
-  // Extraer partes de la fecha en Chile
-  const parts = formatter.formatToParts(now);
-  const getPart = (type: string) => parseInt(parts.find(p => p.type === type)?.value || '0');
-
-  // Construir fecha UTC fija en 2026 usando la hora chilena actual
-  return new Date(Date.UTC(
-    2026, 
-    1, // Febrero es 1
-    getPart('day'), 
-    getPart('hour'), 
-    getPart('minute'), 
-    getPart('second')
-  ));
 };
 
 // Formateadores que fuerzan lectura UTC (ignoran hora del celular)
@@ -240,27 +210,18 @@ export default function App() {
   // Helper: Obtener hora actual de Chile proyectada a 2026 UTC
   const getChileTime2026 = () => {
     const now = new Date();
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/Santiago',
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      hour12: false
-    });
-
-    const parts = formatter.formatToParts(now);
-    const getPart = (type: string) => parseInt(parts.find(p => p.type === type)?.value || '0');
-
+    // Forzamos la zona horaria de Chile
+    const chileTime = new Date(now.toLocaleString("en-US", { timeZone: "America/Santiago" }));
+    
+    // Construimos la fecha en UTC conservando los números de la hora chilena
+    // Importante: Usamos los valores get de chileTime, que son locales a la fecha creada
     return new Date(Date.UTC(
       2026, 
       1, // Febrero fijo
-      getPart('day'), 
-      getPart('hour'), 
-      getPart('minute'), 
-      getPart('second')
+      chileTime.getDate(), 
+      chileTime.getHours(), 
+      chileTime.getMinutes(), 
+      chileTime.getSeconds()
     ));
   };
 
@@ -288,7 +249,7 @@ export default function App() {
     };
     initAuth();
 
-    // ESCUCHAR CAMBIOS EN LA COLECCIÓN V24
+    // ESCUCHAR CAMBIOS EN LA COLECCIÓN V23
     const unsubscribe = onSnapshot(collection(db, COLLECTION_NAME), 
       (snapshot) => {
         if (snapshot.empty) {
@@ -389,25 +350,69 @@ export default function App() {
     return result;
   }, [tasks, search, filterArea, sortBy]);
 
+
   // --- RENDER HELPERS ---
   const renderStatusBadge = (task: any) => {
     const status = getTaskStatus(task, currentTime.getTime());
-    if (status === 'delayed') return <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 animate-pulse border border-red-200"><AlertTriangle size={12} /> ATRASADO</span>;
-    if (status === 'in-progress') return <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-200"><Activity size={12} /> En Progreso</span>;
-    if (status === 'completed') return <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200"><CheckCircle2 size={12} /> LISTO</span>;
-    return <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200"><Clock size={12} /> Pendiente</span>;
+    if (status === 'delayed') return (
+      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 animate-pulse border border-red-200">
+        <AlertTriangle size={12} /> ATRASADO
+      </span>
+    );
+    if (status === 'in-progress') return (
+      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-200">
+        <Activity size={12} /> En Progreso
+      </span>
+    );
+    if (status === 'completed') return (
+      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+        <CheckCircle2 size={12} /> LISTO
+      </span>
+    );
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200">
+        <Clock size={12} /> Pendiente
+      </span>
+    );
   };
 
   const renderProgressButtons = (task: any) => (
     <div className="flex gap-1 w-full justify-between sm:justify-start">
       {[0, 30, 50, 80].map(pct => (
-        <button key={pct} onClick={() => updateTask(task.id, { progress: pct })} className={`flex-1 sm:flex-none h-8 sm:h-6 sm:w-8 text-xs sm:text-[10px] font-bold rounded border transition-colors ${task.progress === pct ? 'bg-slate-900 text-white border-slate-900 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>{pct}%</button>
+        <button
+          key={pct}
+          onClick={() => updateTask(task.id, { progress: pct })}
+          className={`
+            flex-1 sm:flex-none h-8 sm:h-6 sm:w-8 text-xs sm:text-[10px] font-bold rounded border transition-colors
+            ${task.progress === pct 
+              ? 'bg-slate-900 text-white border-slate-900 shadow-sm' 
+              : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}
+          `}
+        >
+          {pct}%
+        </button>
       ))}
-      <button onClick={() => updateTask(task.id, { progress: 100 })} className={`flex-1 sm:flex-none h-8 sm:h-6 sm:w-8 text-xs sm:text-[10px] font-bold rounded border transition-colors ${task.progress === 100 ? 'bg-green-600 text-white border-green-600 shadow-sm' : 'bg-white text-green-600 border-slate-200 hover:bg-green-50'}`}>OK</button>
+      <button
+        onClick={() => updateTask(task.id, { progress: 100 })}
+        className={`
+          flex-1 sm:flex-none h-8 sm:h-6 sm:w-8 text-xs sm:text-[10px] font-bold rounded border transition-colors
+          ${task.progress === 100 
+            ? 'bg-green-600 text-white border-green-600 shadow-sm' 
+            : 'bg-white text-green-600 border-slate-200 hover:bg-green-50'}
+        `}
+      >
+        OK
+      </button>
     </div>
   );
 
-  if (loading) return <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white gap-4"><Loader2 size={40} className="animate-spin text-blue-500" /><p className="font-mono text-sm animate-pulse">Sincronizando Base de Datos...</p></div>;
+  // --- RENDER PRINCIPAL ---
+  if (loading) return (
+    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white gap-4">
+      <Loader2 size={40} className="animate-spin text-blue-500" />
+      <p className="font-mono text-sm animate-pulse">Sincronizando Base de Datos...</p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-10">
@@ -423,8 +428,12 @@ export default function App() {
             </p>
           </div>
         </div>
+        
         <div className="flex items-center gap-2 md:gap-4 bg-slate-800/50 px-3 py-1.5 md:px-4 md:py-2 rounded-lg border border-slate-700 w-full md:w-auto justify-between md:justify-end">
-          <div className="flex items-center gap-2"><Clock size={16} className="text-blue-400" /><span className="text-xs text-slate-300 md:hidden">HORA ACTUAL</span></div>
+          <div className="flex items-center gap-2">
+            <Clock size={16} className="text-blue-400" />
+            <span className="text-xs text-slate-300 md:hidden">HORA ACTUAL</span>
+          </div>
           <p className="text-lg md:text-xl font-mono font-bold leading-none">{formatTime(currentTime)}</p>
         </div>
       </header>
@@ -434,25 +443,49 @@ export default function App() {
         {/* KPI CARDS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <div className="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-            <div><p className="text-xs md:text-sm font-medium text-slate-500">Progreso</p><p className="text-2xl md:text-3xl font-bold text-slate-800">{kpis.realProgressPercent.toFixed(0)}%</p></div>
-            <div className={`h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center ${kpis.realProgressPercent >= 90 ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}><Activity size={18} /></div>
+            <div>
+              <p className="text-xs md:text-sm font-medium text-slate-500">Progreso</p>
+              <p className="text-2xl md:text-3xl font-bold text-slate-800">{kpis.realProgressPercent.toFixed(0)}%</p>
+            </div>
+            <div className={`h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center ${kpis.realProgressPercent >= 90 ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+              <Activity size={18} />
+            </div>
           </div>
+          
           <div className="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-            <div><p className="text-xs md:text-sm font-medium text-slate-500">En Ejecución</p><p className="text-2xl md:text-3xl font-bold text-blue-600">{kpis.inProgress}</p></div>
-            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 animate-pulse"><Zap size={18} /></div>
+            <div>
+              <p className="text-xs md:text-sm font-medium text-slate-500">En Ejecución</p>
+              <p className="text-2xl md:text-3xl font-bold text-blue-600">{kpis.inProgress}</p>
+            </div>
+            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 animate-pulse">
+              <Zap size={18} />
+            </div>
           </div>
+
           <div className="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-            <div><p className="text-xs md:text-sm font-medium text-slate-500">Atrasadas</p><p className={`text-2xl md:text-3xl font-bold ${kpis.delayed > 0 ? 'text-red-600' : 'text-slate-800'}`}>{kpis.delayed}</p></div>
-            <div className={`h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center ${kpis.delayed > 0 ? 'bg-red-100 text-red-600 animate-bounce' : 'bg-slate-100 text-slate-400'}`}><AlertTriangle size={18} /></div>
+            <div>
+              <p className="text-xs md:text-sm font-medium text-slate-500">Atrasadas</p>
+              <p className={`text-2xl md:text-3xl font-bold ${kpis.delayed > 0 ? 'text-red-600' : 'text-slate-800'}`}>{kpis.delayed}</p>
+            </div>
+            <div className={`h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center ${kpis.delayed > 0 ? 'bg-red-100 text-red-600 animate-bounce' : 'bg-slate-100 text-slate-400'}`}>
+              <AlertTriangle size={18} />
+            </div>
           </div>
+
           <div className="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-            <div><p className="text-sm font-medium text-slate-500">Completadas</p><p className="text-3xl font-bold text-green-600">{kpis.completed}/{kpis.total}</p></div>
-            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-green-50 flex items-center justify-center text-green-500"><CheckCircle2 size={18} /></div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Completadas</p>
+              <p className="text-3xl font-bold text-green-600">{kpis.completed}/{kpis.total}</p>
+            </div>
+            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+              <CheckCircle2 size={18} />
+            </div>
           </div>
         </div>
 
         {/* PLANILLA DE CONTROL */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-[calc(100vh-300px)] md:h-[700px]">
+          
           <div className="p-4 border-b border-slate-100 flex flex-col gap-4 bg-slate-50 rounded-t-xl sticky top-0 z-20">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-3">
@@ -462,22 +495,54 @@ export default function App() {
                   <span className="md:hidden">Tareas</span>
                   <span className="bg-slate-200 text-slate-600 text-xs py-1 px-2 rounded-full">{processedTasks.length}</span>
                 </h3>
+                
                 {/* BOTONES DE ORDENAMIENTO */}
                 <div className="flex items-center gap-2 ml-auto sm:ml-4 bg-slate-100 p-1 rounded-lg border border-slate-200">
                    <span className="text-[10px] font-bold text-slate-400 uppercase px-2 hidden sm:block">Ordenar:</span>
-                   <button onClick={() => setSortBy('time')} className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${sortBy === 'time' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}><Clock size={14} /><span>Hora</span></button>
-                   <button onClick={() => setSortBy('id')} className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${sortBy === 'id' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}><Hash size={14} /><span>ID</span></button>
+                   <button
+                     onClick={() => setSortBy('time')}
+                     className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${sortBy === 'time' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}
+                   >
+                     <Clock size={14} />
+                     <span>Hora</span>
+                   </button>
+                   <button
+                     onClick={() => setSortBy('id')}
+                     className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${sortBy === 'id' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'}`}
+                   >
+                     <Hash size={14} />
+                     <span>ID</span>
+                   </button>
                 </div>
               </div>
+              
               <div className="relative w-full md:w-auto">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                <input type="text" placeholder="Buscar..." className="pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full md:w-64" value={search} onChange={(e) => setSearch(e.target.value)} />
+                <input 
+                  type="text" 
+                  placeholder="Buscar..." 
+                  className="pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full md:w-64"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
               </div>
             </div>
+
             {/* BOTONES DE FILTRO DE ÁREA TIPO SWITCH */}
             <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
               {['Todas', 'Seca', 'Molienda', 'Flotacion'].map(area => (
-                <button key={area} onClick={() => setFilterArea(area)} className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${filterArea === area ? 'bg-slate-800 text-white border-slate-800 shadow-md transform scale-105' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}>{area}</button>
+                <button
+                  key={area}
+                  onClick={() => setFilterArea(area)}
+                  className={`
+                    px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border
+                    ${filterArea === area 
+                      ? 'bg-slate-800 text-white border-slate-800 shadow-md transform scale-105' 
+                      : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}
+                  `}
+                >
+                  {area}
+                </button>
               ))}
             </div>
           </div>
@@ -491,7 +556,9 @@ export default function App() {
                   <div key={task.id} className={`bg-white p-4 rounded-xl border shadow-sm flex flex-col gap-3 relative overflow-hidden ${status === 'delayed' ? 'border-l-4 border-l-red-500' : status === 'in-progress' ? 'border-l-4 border-l-blue-500' : status === 'completed' ? 'border-l-4 border-l-green-500 opacity-80' : 'border-l-4 border-l-slate-300'}`}>
                     <div className="flex justify-between items-start">
                       <div className="flex gap-2">
+                        {/* ID ESTILO BADGE (GRIS) */}
                         <span className="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-xs">#{task.id}</span>
+                        {/* OT ESTILO BADGE (AZUL) */}
                         <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-1 rounded font-mono">OT: {task.ot}</span>
                       </div>
                       <div className="text-right">
@@ -500,16 +567,30 @@ export default function App() {
                       </div>
                     </div>
                     <div>
-                      <div className="text-[10px] font-bold text-blue-600 uppercase tracking-tight mb-1 flex items-center gap-1"><GitMerge size={10} /> {task.parent}</div>
+                      <div className="text-[10px] font-bold text-blue-600 uppercase tracking-tight mb-1 flex items-center gap-1">
+                        <GitMerge size={10} /> {task.parent}
+                        {/* AREA OCULTA, SOLO INTERNA */}
+                      </div>
                       <h4 className="font-bold text-sm text-slate-800 leading-tight">{task.name}</h4>
-                      <div className="flex items-center gap-1 text-slate-500 text-xs mt-1"><User size={12} /> {task.resp}</div>
+                      <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
+                        <User size={12} /> {task.resp}
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center mt-1">{renderStatusBadge(task)}</div>
+                    <div className="flex justify-between items-center mt-1">
+                      {renderStatusBadge(task)}
+                    </div>
                     <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
                       {renderProgressButtons(task)}
-                      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden mt-2"><div className={`h-full transition-all duration-500 ${task.progress === 100 ? 'bg-green-500' : 'bg-slate-900'}`} style={{ width: `${task.progress}%` }} /></div>
+                      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden mt-2">
+                        <div className={`h-full transition-all duration-500 ${task.progress === 100 ? 'bg-green-500' : 'bg-slate-900'}`} style={{ width: `${task.progress}%` }} />
+                      </div>
                     </div>
-                    <textarea value={task.notes || ''} onChange={(e) => updateTask(task.id, { notes: e.target.value })} placeholder="Nota..." className="w-full text-xs p-2 rounded border resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none h-14" />
+                    <textarea
+                      value={task.notes || ''}
+                      onChange={(e) => updateTask(task.id, { notes: e.target.value })}
+                      placeholder="Nota..."
+                      className="w-full text-xs p-2 rounded border resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none h-14"
+                    />
                   </div>
                 );
               })}
@@ -534,27 +615,54 @@ export default function App() {
                   const status = getTaskStatus(task, currentTime.getTime());
                   return (
                     <tr key={task.id} className={`transition-colors border-l-4 ${status === 'delayed' ? 'bg-red-50 hover:bg-red-100 border-l-red-500' : status === 'in-progress' ? 'bg-blue-50 hover:bg-blue-100 border-l-blue-500' : status === 'completed' ? 'bg-green-50 opacity-70 border-l-green-500' : 'hover:bg-slate-50 border-l-transparent'}`}>
-                      <td className="p-3 text-center border-b border-slate-100"><span className="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-xs inline-block">#{task.id}</span></td>
-                      <td className="p-3 text-center border-b border-slate-100"><span className="bg-blue-50 text-blue-700 font-bold px-2 py-1 rounded text-xs inline-block font-mono">{task.ot}</span></td>
+                      {/* ID ESTILO BADGE (GRIS) */}
+                      <td className="p-3 text-center border-b border-slate-100">
+                         <span className="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-xs inline-block">
+                           #{task.id}
+                         </span>
+                      </td>
+                      {/* OT ESTILO BADGE (AZUL) */}
+                      <td className="p-3 text-center border-b border-slate-100">
+                         <span className="bg-blue-50 text-blue-700 font-bold px-2 py-1 rounded text-xs inline-block font-mono">
+                           {task.ot}
+                         </span>
+                      </td>
                       <td className="p-3 text-center text-slate-500 text-xs capitalize">{formatDay(safeDate(task.start))}</td>
                       <td className="p-3 align-top">
-                        <div className="flex flex-col text-xs font-mono text-slate-500 font-medium"><span>{formatTime(safeDate(task.start))}</span><span className="text-slate-300 my-0.5">↓</span><span>{formatTime(safeDate(task.end))}</span></div>
+                        <div className="flex flex-col text-xs font-mono text-slate-500 font-medium">
+                          <span>{formatTime(safeDate(task.start))}</span>
+                          <span className="text-slate-300 my-0.5">↓</span>
+                          <span>{formatTime(safeDate(task.end))}</span>
+                        </div>
                       </td>
                       <td className="p-3 align-top">
-                        <div className="flex items-center gap-1.5 mb-1"><GitMerge size={10} className="text-blue-500" /><span className="text-[10px] font-bold text-blue-600 uppercase tracking-tight bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">{task.parent}</span></div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <GitMerge size={10} className="text-blue-500" />
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-tight bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">{task.parent}</span>
+                          {/* AREA OCULTA (NO SE RENDERIZA) */}
+                        </div>
                         <div className="font-medium text-slate-800 mb-1">{task.name}</div>
-                        <div className="text-xs text-slate-500 flex flex-wrap gap-2 items-center"><span className="flex items-center gap-1 text-slate-500"><User size={10} /> {task.resp}</span></div>
+                        <div className="text-xs text-slate-500 flex flex-wrap gap-2 items-center">
+                          <span className="flex items-center gap-1 text-slate-500"><User size={10} /> {task.resp}</span>
+                        </div>
                       </td>
                       <td className="p-3 align-top">{renderStatusBadge(task)}</td>
                       <td className="p-3 align-middle">
                         <div className="flex flex-col items-center gap-2">
-                          <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden"><div className={`h-full transition-all duration-500 ${task.progress === 100 ? 'bg-green-500' : 'bg-slate-900'}`} style={{ width: `${task.progress}%` }} /></div>
+                          <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div className={`h-full transition-all duration-500 ${task.progress === 100 ? 'bg-green-500' : 'bg-slate-900'}`} style={{ width: `${task.progress}%` }} />
+                          </div>
                           {renderProgressButtons(task)}
                         </div>
                       </td>
                       <td className="p-3 align-top">
                         <div className="relative">
-                          <textarea value={task.notes || ''} onChange={(e) => updateTask(task.id, { notes: e.target.value })} placeholder="Nota..." className="w-full text-xs p-2 rounded border resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors h-16" />
+                          <textarea
+                            value={task.notes || ''}
+                            onChange={(e) => updateTask(task.id, { notes: e.target.value })}
+                            placeholder="Nota..."
+                            className="w-full text-xs p-2 rounded border resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors h-16"
+                          />
                           {task.notes && <div className="absolute bottom-2 right-2 text-green-500"><Save size={12} /></div>}
                         </div>
                       </td>
@@ -563,9 +671,17 @@ export default function App() {
                 })}
               </tbody>
             </table>
-            {processedTasks.length === 0 && <div className="text-center py-10 text-slate-400"><Search size={40} className="mx-auto mb-2 opacity-20" /><p>No se encontraron tareas con ese filtro.</p></div>}
+            
+            {processedTasks.length === 0 && (
+              <div className="text-center py-10 text-slate-400">
+                <Search size={40} className="mx-auto mb-2 opacity-20" />
+                <p>No se encontraron tareas con ese filtro.</p>
+              </div>
+            )}
           </div>
-          <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-center text-slate-400">Mostrando {processedTasks.length} de {tasks.length} tareas sincronizadas</div>
+          <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-center text-slate-400">
+            Mostrando {processedTasks.length} de {tasks.length} tareas sincronizadas
+          </div>
         </div>
       </main>
     </div>
