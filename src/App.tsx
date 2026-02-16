@@ -40,7 +40,7 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// NOMBRE DE LA COLECCIÓN (V29: Version Con OTs y retiro de 1 actividad)
+// NOMBRE DE LA COLECCIÓN (V30: Version Con todas als OTs)
 const COLLECTION_NAME = "tasks_prod_v29";
 
 // --- 2. CONFIGURACIÓN DE FECHAS (FIX ZONA HORARIA ROBUSTO) ---
@@ -80,39 +80,39 @@ const formatDay = (date: Date) => {
 // --- 3. DATOS SEMILLA REALES (105 TAREAS E&I) ---
 const INITIAL_TASKS_DATA = [
   // CHUTE 7 / SENSORES POLEA MOTRIZ
-  { area: "Seca", id: "4", ot: "793212", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Bloqueo de equipo ", start: d(17,7,0), end: d(17,7,30), resp: "Rodrigo Muñoz" },
-  { area: "Seca", id: "5", ot: "S/OT", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Retiro de sensor microondas chute 7", start: d(17,7,30), end: d(17,8,0), resp: "Rodrigo Muñoz" },
-  { area: "Seca", id: "9", ot: "S/OT", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Instalación de sensores", start: d(17,9,30), end: d(17,12,30), resp: "Rodrigo Muñoz" },
-  { area: "Seca", id: "10", ot: "792466", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Modificación posición sensor tilt switch", start: d(17,12,30), end: d(17,13,30), resp: "Rodrigo Muñoz" },  
-  { area: "Seca", id: "13", ot: "793212", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Desbloqueo", start: d(18,19,0), end: d(18,19,30), resp: "Jose Avalos" },  
-  { area: "Seca", id: "15", ot: "793212", parent: "CHUTE 7 / CAMBIO ELEMENTOS DESGASTE", name: "Bloqueo de equipo (Chute 4)", start: d(18,9,30), end: d(18,10,0), resp: "Vicente Fuentes" },
-  { area: "Seca", id: "17", ot: "-", parent: "CHUTE 7 / CAMBIO ELEMENTOS DESGASTE", name: "Desbloqueo", start: d(18,19,0), end: d(18,19,30), resp: "Jose Avalos" },
+  { area: "Seca", id: "4", ot: "801646", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Bloqueo de equipo ", start: d(17,7,0), end: d(17,7,30), resp: "Rodrigo Muñoz" },
+  { area: "Seca", id: "5", ot: "801609", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Retiro de sensor microondas chute 7", start: d(17,7,30), end: d(17,8,0), resp: "Rodrigo Muñoz" },
+  { area: "Seca", id: "9", ot: "801611", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Instalación de sensores", start: d(17,9,30), end: d(17,12,30), resp: "Rodrigo Muñoz" },
+  { area: "Seca", id: "10", ot: "801611", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Modificación posición sensor tilt switch", start: d(17,12,30), end: d(17,13,30), resp: "Rodrigo Muñoz" },  
+  { area: "Seca", id: "13", ot: "801646", parent: "CHUTE 7 / INSTALACION SENSORES POLEA MOTRIZ", name: "Desbloqueo", start: d(18,19,0), end: d(18,19,30), resp: "Jose Avalos" },  
+  { area: "Seca", id: "15", ot: "801646", parent: "CHUTE 7 / CAMBIO ELEMENTOS DESGASTE", name: "Bloqueo de equipo (Chute 4)", start: d(18,9,30), end: d(18,10,0), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "17", ot: "801646", parent: "CHUTE 7 / CAMBIO ELEMENTOS DESGASTE", name: "Desbloqueo", start: d(18,19,0), end: d(18,19,30), resp: "Jose Avalos" },
   
 // CHUTE 4
-  { area: "Seca", id: "19", ot: "-", parent: "CHUTE 4", name: "Bloqueo de equipo", start: d(17,7,0), end: d(17,7,30), resp: "Vicente Fuentes" },
-  { area: "Seca", id: "21", ot: "793212", parent: "CHUTE 4", name: "Desbloqueo", start: d(17,16,30), end: d(17,17,0), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "19", ot: "801652", parent: "CHUTE 4", name: "Bloqueo de equipo", start: d(17,7,0), end: d(17,7,30), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "21", ot: "801652", parent: "CHUTE 4", name: "Desbloqueo", start: d(17,16,30), end: d(17,17,0), resp: "Vicente Fuentes" },
 
   // CAMBIO REDUCTOR G1-CORREA 2
-  { area: "Seca", id: "28", ot: "S/OT", parent: "CAMBIO REDUCTOR G1-CORREA 2 / PREPARATIVOS", name: "Desconexión de motor", start: d(17,7,0), end: d(17,7,0), resp: "Vicente Fuentes" },
-  { area: "Seca", id: "33", ot: "793212", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Bloqueo de CVB-002", start: d(17,7,0), end: d(17,7,30), resp: "Patricio Gutierrez" },
-  { area: "Seca", id: "39", ot: "S/OT", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Pruebas de sentido de giro", start: d(17,14,18), end: d(17,14,48), resp: "Vicente Fuentes" },
-  { area: "Seca", id: "41", ot: "-", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Pruebas de sentido de giro", start: d(17,15,48), end: d(17,16,0), resp: "Vicente Fuentes" },
-  { area: "Seca", id: "42", ot: "793212", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Desbloqueo Correa 2", start: d(17,16,0), end: d(17,17,0), resp: "Vicente Fuentes" },
-  { area: "Seca", id: "45", ot: "793212", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Bloqueo Correa 2", start: d(18,9,0), end: d(18,9,30), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "28", ot: "801613", parent: "CAMBIO REDUCTOR G1-CORREA 2 / PREPARATIVOS", name: "Desconexión de motor", start: d(17,7,0), end: d(17,7,0), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "33", ot: "801653", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Bloqueo de CVB-002", start: d(17,7,0), end: d(17,7,30), resp: "Patricio Gutierrez" },
+  { area: "Seca", id: "39", ot: "798885", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Pruebas de sentido de giro", start: d(17,14,18), end: d(17,14,48), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "41", ot: "801614", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Pruebas de sentido de giro", start: d(17,15,48), end: d(17,16,0), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "42", ot: "801653", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Desbloqueo Correa 2", start: d(17,16,0), end: d(17,17,0), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "45", ot: "801653", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Bloqueo Correa 2", start: d(18,9,0), end: d(18,9,30), resp: "Vicente Fuentes" },
   { area: "Seca", id: "48", ot: "798885", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Instalación de instrumentación", start: d(18,16,0), end: d(18,18,0), resp: "Francis Torres" },
-  { area: "Seca", id: "50", ot: "793212", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Desbloqueo", start: d(18,18,30), end: d(18,19,0), resp: "Jose Avalos" },
-  { area: "Seca", id: "51", ot: "798885", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Pruebas funcionales", start: d(18,18,30), end: d(18,19,0), resp: "Jose Avalos" },
+  { area: "Seca", id: "50", ot: "801653", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Desbloqueo", start: d(18,18,30), end: d(18,19,0), resp: "Jose Avalos" },
+  { area: "Seca", id: "51", ot: "801661", parent: "CAMBIO REDUCTOR G1-CORREA 2 / MONTAJE", name: "Pruebas funcionales", start: d(18,18,30), end: d(18,19,0), resp: "Jose Avalos" },
    
   // INSPECCIÓN MOTORES CVB-001
-  { area: "Seca", id: "54", ot: "793212", parent: "INSPECCIÓN MOTORES CORREA CVB-001", name: "Bloqueo de equipo", start: d(17,7,0), end: d(17,7,30), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "54", ot: "801656", parent: "INSPECCIÓN MOTORES CORREA CVB-001", name: "Bloqueo de equipo", start: d(17,7,0), end: d(17,7,30), resp: "Vicente Fuentes" },
   { area: "Seca", id: "55", ot: "798888", parent: "INSPECCIÓN MOTORES CORREA CVB-001", name: "Inspección carbones motor M1", start: d(17,7,30), end: d(17,8,0), resp: "Vicente Fuentes" },
   { area: "Seca", id: "56", ot: "798888", parent: "INSPECCIÓN MOTORES CORREA CVB-001", name: "Inspección partidor resistivo M1", start: d(17,8,0), end: d(17,9,0), resp: "Vicente Fuentes" },
   { area: "Seca", id: "57", ot: "798889", parent: "INSPECCIÓN MOTORES CORREA CVB-001", name: "Inspección carbones motor M2", start: d(17,9,0), end: d(17,9,30), resp: "Vicente Fuentes" },
   { area: "Seca", id: "58", ot: "798889", parent: "INSPECCIÓN MOTORES CORREA CVB-001", name: "Inspección partidor resistivo M2", start: d(17,9,30), end: d(17,10,30), resp: "Vicente Fuentes" },
-  { area: "Seca", id: "59", ot: "793212", parent: "INSPECCIÓN MOTORES CORREA CVB-001", name: "Desbloqueo", start: d(17,10,30), end: d(17,11,0), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "59", ot: "801656", parent: "INSPECCIÓN MOTORES CORREA CVB-001", name: "Desbloqueo", start: d(17,10,30), end: d(17,11,0), resp: "Vicente Fuentes" },
 
   // INSPECCIÓN MOTORES CVB-002
-  { area: "Seca", id: "61", ot: "793214", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Bloqueo de equipo", start: d(18,10,0), end: d(18,10,30), resp: "Vicente Fuentes" },
+  { area: "Seca", id: "61", ot: "801653", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Bloqueo de equipo", start: d(18,10,0), end: d(18,10,30), resp: "Vicente Fuentes" },
   { area: "Seca", id: "62", ot: "798890", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Inspección carbones motor M1", start: d(18,10,30), end: d(18,11,0), resp: "Vicente Fuentes" },
   { area: "Seca", id: "63", ot: "798890", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Inspección partidor resistivo M1", start: d(18,11,0), end: d(18,12,0), resp: "Vicente Fuentes" },
   { area: "Seca", id: "64", ot: "798892", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Inspección carbones motor M2", start: d(18,12,0), end: d(18,12,30), resp: "Vicente Fuentes" },
@@ -121,18 +121,18 @@ const INITIAL_TASKS_DATA = [
   { area: "Seca", id: "67", ot: "798894", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Inspección partidor resistivo M3", start: d(18,14,0), end: d(18,15,0), resp: "Vicente Fuentes" },
   { area: "Seca", id: "68", ot: "798897", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Inspección carbones motor M4", start: d(18,15,0), end: d(18,15,30), resp: "Vicente Fuentes" },
   { area: "Seca", id: "69", ot: "798897", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Inspección partidor resistivo M4", start: d(18,15,30), end: d(18,16,30), resp: "Vicente Fuentes" },
-  { area: "Seca", id: "70", ot: "793214", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Desbloqueo", start: d(18,16,30), end: d(18,17,0), resp: "Jose Avalos" },
+  { area: "Seca", id: "70", ot: "801653", parent: "INSPECCIÓN MOTORES CORREA CVB-002", name: "Desbloqueo", start: d(18,16,30), end: d(18,17,0), resp: "Jose Avalos" },
 
   // CAMBIO DE CINTA CVB-006
-  { area: "Seca", id: "81", ot: "S/OT", parent: "CAMBIO DE CINTA CVB-006", name: "Bloqueo de cinta OPE", start: d(17,7,0), end: d(17,7,30), resp: "Nicole Troncoso" },
-  { area: "Seca", id: "83", ot: "798899", parent: "CAMBIO DE CINTA CVB-006", name: "Desbloqueo de cinta OPE", start: d(17,9,30), end: d(17,10,0), resp: "Nicole Troncoso" },
-  { area: "Seca", id: "88", ot: "798899", parent: "CAMBIO DE CINTA CVB-006", name: "Aislación y bloqueo", start: d(17,10,42), end: d(17,11,12), resp: "Nicole Troncoso" },
-  { area: "Seca", id: "93", ot: "S/OT", parent: "CAMBIO DE CINTA CVB-006", name: "Retiro de instrumentación", start: d(17,13,0), end: d(17,15,0), resp: "Osvaldo Sanhueza / Ronny Velasquez" },
-  { area: "Seca", id: "112", ot: "798899", parent: "CAMBIO DE CINTA CVB-006", name: "Desbloqueo para tensado", start: d(18,20,30), end: d(18,21,0), resp: "Daniel Carrasco" },
-  { area: "Seca", id: "115", ot: "798899", parent: "CAMBIO DE CINTA CVB-006", name: "Bloqueo", start: d(18,22,0), end: d(18,22,30), resp: "Daniel Carrasco" },
-  { area: "Seca", id: "117", ot: "798899", parent: "CAMBIO DE CINTA CVB-006", name: "Instalación instrumentación", start: d(18,22,30), end: d(19,0,30), resp: "Cristopher Villalobos" },
-  { area: "Seca", id: "120", ot: "798899", parent: "CAMBIO DE CINTA CVB-006", name: "Desbloqueo", start: d(19,0,30), end: d(19,1,0), resp: "Daniel Carrasco" },
-  { area: "Seca", id: "121", ot: "S/OT", parent: "CAMBIO DE CINTA CVB-006", name: "Calibración cero y span (cadenas)", start: d(19,1,0), end: d(19,4,0), resp: "Cristopher Villalobos" },
+  { area: "Seca", id: "81", ot: "801715", parent: "CAMBIO DE CINTA CVB-006", name: "Bloqueo de cinta OPE", start: d(17,7,0), end: d(17,7,30), resp: "Nicole Troncoso" },
+  { area: "Seca", id: "83", ot: "801715", parent: "CAMBIO DE CINTA CVB-006", name: "Desbloqueo de cinta OPE", start: d(17,9,30), end: d(17,10,0), resp: "Nicole Troncoso" },
+  { area: "Seca", id: "88", ot: "801715", parent: "CAMBIO DE CINTA CVB-006", name: "Aislación y bloqueo", start: d(17,10,42), end: d(17,11,12), resp: "Nicole Troncoso" },
+  { area: "Seca", id: "93", ot: "801716", parent: "CAMBIO DE CINTA CVB-006", name: "Retiro de instrumentación", start: d(17,13,0), end: d(17,15,0), resp: "Osvaldo Sanhueza / Ronny Velasquez" },
+  { area: "Seca", id: "112", ot: "801715", parent: "CAMBIO DE CINTA CVB-006", name: "Desbloqueo para tensado", start: d(18,20,30), end: d(18,21,0), resp: "Daniel Carrasco" },
+  { area: "Seca", id: "115", ot: "801715", parent: "CAMBIO DE CINTA CVB-006", name: "Bloqueo", start: d(18,22,0), end: d(18,22,30), resp: "Daniel Carrasco" },
+  { area: "Seca", id: "117", ot: "801716", parent: "CAMBIO DE CINTA CVB-006", name: "Instalación instrumentación", start: d(18,22,30), end: d(19,0,30), resp: "Cristopher Villalobos" },
+  { area: "Seca", id: "120", ot: "801715", parent: "CAMBIO DE CINTA CVB-006", name: "Desbloqueo", start: d(19,0,30), end: d(19,1,0), resp: "Daniel Carrasco" },
+  { area: "Seca", id: "121", ot: "801717", parent: "CAMBIO DE CINTA CVB-006", name: "Calibración cero y span (cadenas)", start: d(19,1,0), end: d(19,4,0), resp: "Cristopher Villalobos" },
 
   // MOLINO SAG 1 / MEDICION PERNOS
   { area: "Molienda", id: "124", ot: "801575", parent: "MOLINO SAG 1 / MEDICION PERNOS", name: "Bloqueo de equipo", start: d(17,7,0), end: d(17,7,30), resp: "Sergio Rojas" },
@@ -140,19 +140,19 @@ const INITIAL_TASKS_DATA = [
    // MOLINO SAG 1 / CAMBIO PARRILLAS
   { area: "Molienda", id: "131", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo de equipo", start: d(17,10,12), end: d(17,10,42), resp: "Sergio Rojas" },  
   { area: "Molienda", id: "145", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(17,21,24), end: d(17,21,54), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "146", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 1", start: d(17,21,54), end: d(17,22,18), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "146", ot: "801584", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 1", start: d(17,21,54), end: d(17,22,18), resp: "Daniel Carrasco" },
   { area: "Molienda", id: "147", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(17,22,18), end: d(17,22,48), resp: "Daniel Carrasco" },
   { area: "Molienda", id: "151", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,0,36), end: d(18,1,6), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "152", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 2", start: d(18,1,6), end: d(18,1,30), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "152", ot: "801584", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 2", start: d(18,1,6), end: d(18,1,30), resp: "Daniel Carrasco" },
   { area: "Molienda", id: "153", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,1,30), end: d(18,2,0), resp: "Daniel Carrasco" },
   { area: "Molienda", id: "157", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,3,48), end: d(18,4,18), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "158", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 3", start: d(18,4,18), end: d(18,4,42), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "158", ot: "801584", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 3", start: d(18,4,18), end: d(18,4,42), resp: "Daniel Carrasco" },
   { area: "Molienda", id: "159", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,4,42), end: d(18,5,12), resp: "Daniel Carrasco" },
   { area: "Molienda", id: "163", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,7,0), end: d(18,7,30), resp: "Patricio Gutierrez" },
-  { area: "Molienda", id: "164", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 4", start: d(18,7,30), end: d(18,7,54), resp: "Patricio Gutierrez" },
+  { area: "Molienda", id: "164", ot: "801584", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 4", start: d(18,7,30), end: d(18,7,54), resp: "Patricio Gutierrez" },
   { area: "Molienda", id: "165", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,7,54), end: d(18,8,24), resp: "Patricio Gutierrez" },
   { area: "Molienda", id: "169", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,10,12), end: d(18,10,42), resp: "Patricio Gutierrez" },
-  { area: "Molienda", id: "170", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 5", start: d(18,10,42), end: d(18,11,6), resp: "Patricio Gutierrez" },
+  { area: "Molienda", id: "170", ot: "801584", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 5", start: d(18,10,42), end: d(18,11,6), resp: "Patricio Gutierrez" },
   { area: "Molienda", id: "171", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,11,6), end: d(18,11,36), resp: "Patricio Gutierrez" },
 
 //CAMBIO REGADERAS INFERIORES
