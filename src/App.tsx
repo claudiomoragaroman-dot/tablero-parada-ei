@@ -25,7 +25,7 @@ import {
 } from 'firebase/firestore';
 import { getAuth, signInAnonymously } from "firebase/auth";
 
-// --- 1. CONFIGURACIÓN FIREBASE (TUS CREDENCIALES) ---
+// --- 1. CONFIGURACIÓN FIREBASE (MIS CREDENCIALES) ---
 const firebaseConfig = {
   apiKey: "AIzaSyDt-FcP9BaNMbMpg6dKrQ7wO1eNBykLANA",
   authDomain: "detencion-planta---1702.firebaseapp.com",
@@ -40,8 +40,8 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// NOMBRE DE LA COLECCIÓN (V23: Versión blindada para iPhone/Android)
-const COLLECTION_NAME = "tasks_prod_v28";
+// NOMBRE DE LA COLECCIÓN (V29: Version Con OTs y retiro de 1 actividad)
+const COLLECTION_NAME = "tasks_prod_v29";
 
 // --- 2. CONFIGURACIÓN DE FECHAS (FIX ZONA HORARIA ROBUSTO) ---
 
@@ -135,71 +135,70 @@ const INITIAL_TASKS_DATA = [
   { area: "Seca", id: "121", ot: "S/OT", parent: "CAMBIO DE CINTA CVB-006", name: "Calibración cero y span (cadenas)", start: d(19,1,0), end: d(19,4,0), resp: "Cristopher Villalobos" },
 
   // MOLINO SAG 1 / MEDICION PERNOS
-  { area: "Molienda", id: "124", ot: "-", parent: "MOLINO SAG 1 / MEDICION PERNOS", name: "Bloqueo de equipo", start: d(17,7,0), end: d(17,7,30), resp: "Sergio Rojas" },
+  { area: "Molienda", id: "124", ot: "801575", parent: "MOLINO SAG 1 / MEDICION PERNOS", name: "Bloqueo de equipo", start: d(17,7,0), end: d(17,7,30), resp: "Sergio Rojas" },
 
    // MOLINO SAG 1 / CAMBIO PARRILLAS
-  { area: "Molienda", id: "131", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo de equipo", start: d(17,10,12), end: d(17,10,42), resp: "Sergio Rojas" },  
-  { area: "Molienda", id: "145", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(17,21,24), end: d(17,21,54), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "146", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 1", start: d(17,21,54), end: d(17,22,18), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "147", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(17,22,18), end: d(17,22,48), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "151", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,0,36), end: d(18,1,6), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "152", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 2", start: d(18,1,6), end: d(18,1,30), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "153", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,1,30), end: d(18,2,0), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "157", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,3,48), end: d(18,4,18), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "158", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 3", start: d(18,4,18), end: d(18,4,42), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "159", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,4,42), end: d(18,5,12), resp: "Daniel Carrasco" },
-  { area: "Molienda", id: "163", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,7,0), end: d(18,7,30), resp: "Patricio Gutierrez" },
-  { area: "Molienda", id: "164", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 4", start: d(18,7,30), end: d(18,7,54), resp: "Patricio Gutierrez" },
-  { area: "Molienda", id: "165", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,7,54), end: d(18,8,24), resp: "Patricio Gutierrez" },
-  { area: "Molienda", id: "169", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,10,12), end: d(18,10,42), resp: "Patricio Gutierrez" },
-  { area: "Molienda", id: "170", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 5", start: d(18,10,42), end: d(18,11,6), resp: "Patricio Gutierrez" },
-  { area: "Molienda", id: "171", ot: "-", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,11,6), end: d(18,11,36), resp: "Patricio Gutierrez" },
+  { area: "Molienda", id: "131", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo de equipo", start: d(17,10,12), end: d(17,10,42), resp: "Sergio Rojas" },  
+  { area: "Molienda", id: "145", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(17,21,24), end: d(17,21,54), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "146", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 1", start: d(17,21,54), end: d(17,22,18), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "147", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(17,22,18), end: d(17,22,48), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "151", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,0,36), end: d(18,1,6), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "152", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 2", start: d(18,1,6), end: d(18,1,30), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "153", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,1,30), end: d(18,2,0), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "157", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,3,48), end: d(18,4,18), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "158", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 3", start: d(18,4,18), end: d(18,4,42), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "159", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,4,42), end: d(18,5,12), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "163", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,7,0), end: d(18,7,30), resp: "Patricio Gutierrez" },
+  { area: "Molienda", id: "164", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 4", start: d(18,7,30), end: d(18,7,54), resp: "Patricio Gutierrez" },
+  { area: "Molienda", id: "165", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,7,54), end: d(18,8,24), resp: "Patricio Gutierrez" },
+  { area: "Molienda", id: "169", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Desbloqueo", start: d(18,10,12), end: d(18,10,42), resp: "Patricio Gutierrez" },
+  { area: "Molienda", id: "170", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Giro 5", start: d(18,10,42), end: d(18,11,6), resp: "Patricio Gutierrez" },
+  { area: "Molienda", id: "171", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO PARRILLAS", name: "Bloqueo", start: d(18,11,6), end: d(18,11,36), resp: "Patricio Gutierrez" },
 
 //CAMBIO REGADERAS INFERIORES
-  { area: "Molienda", id: "181", ot: "-", parent: "MOLINO SAG 1 / CAMBIO REGADERAS", name: "Montaje de caperuza", start: d(18,22,54), end: d(18,23,24), resp: "Osvaldo Sanhueza" },
-  { area: "Molienda", id: "182", ot: "-", parent: "MOLINO SAG 1 / CAMBIO REGADERAS", name: "Desbloqueo", start: d(18,23,24), end: d(18,23,54), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "182", ot: "801575", parent: "MOLINO SAG 1 / CAMBIO REGADERAS", name: "Desbloqueo", start: d(18,23,24), end: d(18,23,54), resp: "Daniel Carrasco" },
 
 //BOMBA PPS-011 / CAMBIO WET-END
-  { area: "Molienda", id: "186", ot: "798899", parent: "BOMBA PPS-011 / CAMBIO WET-END", name: "Bloqueo de equipo", start: d(17,7,30), end: d(17,8,0), resp: "Osvaldo Sanhueza" },
-  { area: "Molienda", id: "187", ot: "-", parent: "BOMBA PPS-011 / CAMBIO WET-END", name: "Desacople ductos succion/descarga", start: d(17,8,0), end: d(17,12,0), resp: "Ronny Velasquez" },
-  { area: "Molienda", id: "190", ot: "-", parent: "BOMBA PPS-011 / CAMBIO WET-END", name: "Acoplamiento de ductos", start: d(18,4,0), end: d(18,6,30), resp: "Francis Torres" },
-  { area: "Molienda", id: "191", ot: "-", parent: "BOMBA PPS-011 / CAMBIO WET-END", name: "Desbloqueo", start: d(18,6,30), end: d(18,7,0), resp: "Daniel Carrasco" },
+  { area: "Molienda", id: "186", ot: "801579", parent: "BOMBA PPS-011 / CAMBIO WET-END", name: "Bloqueo de equipo", start: d(17,7,30), end: d(17,8,0), resp: "Osvaldo Sanhueza" },
+  { area: "Molienda", id: "187", ot: "801579", parent: "BOMBA PPS-011 / CAMBIO WET-END", name: "Desacople ductos succion/descarga", start: d(17,8,0), end: d(17,12,0), resp: "Ronny Velasquez" },
+  { area: "Molienda", id: "190", ot: "801579", parent: "BOMBA PPS-011 / CAMBIO WET-END", name: "Acoplamiento de ductos", start: d(18,4,0), end: d(18,6,30), resp: "Francis Torres" },
+  { area: "Molienda", id: "191", ot: "801579", parent: "BOMBA PPS-011 / CAMBIO WET-END", name: "Desbloqueo", start: d(18,6,30), end: d(18,7,0), resp: "Daniel Carrasco" },
 
 //BOMBA PPS-012 / CAMBIO REPARACION FUGAS
-  { area: "Molienda", id: "199", ot: "798899", parent: "BOMBA PPS-012 / REPARACIÓN FUGAS", name: "Bloqueo de equipo (Bomba PPS-012)", start: d(17,7,0), end: d(17,7,30), resp: "Osvaldo Sanhueza" },
-  { area: "Molienda", id: "203", ot: "798899", parent: "BOMBA PPS-012 / REPARACIÓN FUGAS", name: "Desbloqueo", start: d(18,11,30), end: d(18,12,0), resp: "Osvaldo Sanhueza" },
+  { area: "Molienda", id: "199", ot: "801581", parent: "BOMBA PPS-012 / REPARACIÓN FUGAS", name: "Bloqueo de equipo (Bomba PPS-012)", start: d(17,7,0), end: d(17,7,30), resp: "Osvaldo Sanhueza" },
+  { area: "Molienda", id: "203", ot: "801581", parent: "BOMBA PPS-012 / REPARACIÓN FUGAS", name: "Desbloqueo", start: d(18,11,30), end: d(18,12,0), resp: "Osvaldo Sanhueza" },
 
 //MOLINO BOLAS 1 / AJUSTE SISTEMA DE ENGRASE
-  { area: "Molienda", id: "206", ot: "798899", parent: "MOLINO BOLAS 1 / SISTEMA ENGRASE", name: "Bloqueo de equipo (Molino Bolas 1)", start: d(17,7,0), end: d(17,7,30), resp: "Sergio Rojas" },
-  { area: "Molienda", id: "210", ot: "798899", parent: "MOLINO BOLAS 1 / SISTEMA ENGRASE", name: "Desbloqueo de equipo", start: d(18,17,30), end: d(18,18,0), resp: "Sergio Rojas" },
+  { area: "Molienda", id: "206", ot: "801577", parent: "MOLINO BOLAS 1 / SISTEMA ENGRASE", name: "Bloqueo de equipo (Molino Bolas 1)", start: d(17,7,0), end: d(17,7,30), resp: "Sergio Rojas" },
+  { area: "Molienda", id: "210", ot: "801577", parent: "MOLINO BOLAS 1 / SISTEMA ENGRASE", name: "Desbloqueo de equipo", start: d(18,17,30), end: d(18,18,0), resp: "Sergio Rojas" },
 
 //MOLINO BOLAS 1 / REFUERZO CANALETA
-  { area: "Molienda", id: "212", ot: "798899", parent: "MOLINO BOLAS 1 / REFUERZO CANALETA", name: "Bloqueo equipo (Refuerzo Canaleta)", start: d(18,7,0), end: d(18,7,30), resp: "Sergio Rojas" },
-  { area: "Molienda", id: "214", ot: "-", parent: "MOLINO BOLAS 1 / REFUERZO CANALETA", name: "Desbloqueo", start: d(18,19,30), end: d(18,20,0), resp: "Jose Avalos" },
+  { area: "Molienda", id: "212", ot: "801577", parent: "MOLINO BOLAS 1 / REFUERZO CANALETA", name: "Bloqueo equipo (Refuerzo Canaleta)", start: d(18,7,0), end: d(18,7,30), resp: "Sergio Rojas" },
+  { area: "Molienda", id: "214", ot: "801577", parent: "MOLINO BOLAS 1 / REFUERZO CANALETA", name: "Desbloqueo", start: d(18,19,30), end: d(18,20,0), resp: "Jose Avalos" },
 
-//MOLINO BOLAS / REFUERZO CANALETA
-  { area: "Molienda", id: "217", ot: "-", parent: "MOLINO BOLAS 2 / REFUERZO CANALETA", name: "Bloqueo de equipo (Molino Bolas 2)", start: d(17,7,0), end: d(17,7,30), resp: "Sergio Rojas" },
-  { area: "Molienda", id: "219", ot: "-", parent: "MOLINO BOLAS 2 / REFUERZO CANALETA", name: "Desbloqueo", start: d(17,19,30), end: d(17,20,0), resp: "José Avalos" },
+//MOLINO BOLAS 2 / REFUERZO CANALETA
+  { area: "Molienda", id: "217", ot: "801578", parent: "MOLINO BOLAS 2 / REFUERZO CANALETA", name: "Bloqueo de equipo (Molino Bolas 2)", start: d(17,7,0), end: d(17,7,30), resp: "Sergio Rojas" },
+  { area: "Molienda", id: "219", ot: "801578", parent: "MOLINO BOLAS 2 / REFUERZO CANALETA", name: "Desbloqueo", start: d(17,19,30), end: d(17,20,0), resp: "José Avalos" },
 
 //REVISIÓN PUENTE POLO A POLO SAG 1
   { area: "Molienda", id: "236", ot: "793279", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Posicionamiento de molino", start: d(17,7,0), end: d(17,7,15), resp: "Jorge Garrido" },
   { area: "Molienda", id: "237", ot: "793279", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Bloqueo de equipo", start: d(17,7,15), end: d(17,7,45), resp: "Sergio Rojas" },
-  { area: "Molienda", id: "238", ot: "-", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Montaje andamios (3 y 9)", start: d(17,7,45), end: d(17,8,45), resp: "Jorge Garrido" },
-  { area: "Molienda", id: "239", ot: "-", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Retiro de tapas (3 y 9)", start: d(17,8,45), end: d(17,9,45), resp: "Jorge Garrido" },
+  { area: "Molienda", id: "238", ot: "793279", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Montaje andamios (3 y 9)", start: d(17,7,45), end: d(17,8,45), resp: "Jorge Garrido" },
+  { area: "Molienda", id: "239", ot: "793279", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Retiro de tapas (3 y 9)", start: d(17,8,45), end: d(17,9,45), resp: "Jorge Garrido" },
   { area: "Molienda", id: "240", ot: "793279", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Inspección de polos", start: d(17,9,45), end: d(17,13,45), resp: "Jorge Garrido" },
-  { area: "Molienda", id: "241", ot: "-", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Instalación de tapas (3 y 9)", start: d(17,13,45), end: d(17,14,45), resp: "Jorge Garrido" },
-  { area: "Molienda", id: "242", ot: "-", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Retiro de andamios (3 y 9)", start: d(17,14,45), end: d(17,15,45), resp: "Jorge Garrido" },  
+  { area: "Molienda", id: "241", ot: "793279", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Instalación de tapas (3 y 9)", start: d(17,13,45), end: d(17,14,45), resp: "Jorge Garrido" },
+  { area: "Molienda", id: "242", ot: "793279", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Retiro de andamios (3 y 9)", start: d(17,14,45), end: d(17,15,45), resp: "Jorge Garrido" },  
   { area: "Molienda", id: "243", ot: "793279", parent: "REVISIÓN PUENTE POLO A POLO SAG 1", name: "Desbloqueo de equipos", start: d(17,15,45), end: d(17,16,15), resp: "Sergio Rojas" },
 
  // REV. SENSORES TEMP PAD TRUNNION SAG 1
-  { area: "Molienda", id: "245", ot: "794213", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Bloqueo sistema lubricación molino", start: d(17,11,0), end: d(17,11,30), resp: "Sergio Rojas" },
-  { area: "Molienda", id: "246", ot: "-", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Instalación de andamios (ambos lados)", start: d(17,11,30), end: d(17,12,30), resp: "Jorge Garrido" },
-  { area: "Molienda", id: "248", ot: "-", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Retiro de sensores", start: d(17,13,0), end: d(17,14,0), resp: "Jorge Ponce" },
-  { area: "Molienda", id: "249", ot: "-", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Medición de MONCON (PAD)", start: d(17,14,0), end: d(17,14,30), resp: "Jorge Ponce" },
-  { area: "Molienda", id: "250", ot: "-", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Revisión sensores temp. PAD", start: d(17,14,30), end: d(17,16,0), resp: "Jorge Ponce" },
-  { area: "Molienda", id: "251", ot: "-", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Instalación de sensores", start: d(17,16,0), end: d(17,17,0), resp: "Jorge Ponce" },
-  { area: "Molienda", id: "253", ot: "-", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Retiro de andamios", start: d(17,17,30), end: d(17,18,30), resp: "Jorge Garrido" },
-  { area: "Molienda", id: "254", ot: "-", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Desbloqueo de equipo", start: d(17,18,30), end: d(17,19,0), resp: "Sergio Rojas" },
+  { area: "Molienda", id: "245", ot: "801612", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Bloqueo sistema lubricación molino", start: d(17,11,0), end: d(17,11,30), resp: "Sergio Rojas" },
+  { area: "Molienda", id: "246", ot: "801612", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Instalación de andamios (ambos lados)", start: d(17,11,30), end: d(17,12,30), resp: "Jorge Garrido" },
+  { area: "Molienda", id: "248", ot: "801612", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Retiro de sensores", start: d(17,13,0), end: d(17,14,0), resp: "Jorge Ponce" },
+  { area: "Molienda", id: "249", ot: "801612", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Medición de MONCON (PAD)", start: d(17,14,0), end: d(17,14,30), resp: "Jorge Ponce" },
+  { area: "Molienda", id: "250", ot: "801612", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Revisión sensores temp. PAD", start: d(17,14,30), end: d(17,16,0), resp: "Jorge Ponce" },
+  { area: "Molienda", id: "251", ot: "801612", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Instalación de sensores", start: d(17,16,0), end: d(17,17,0), resp: "Jorge Ponce" },
+  { area: "Molienda", id: "253", ot: "801612", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Retiro de andamios", start: d(17,17,30), end: d(17,18,30), resp: "Jorge Garrido" },
+  { area: "Molienda", id: "254", ot: "801612", parent: "REV. SENSORES TEMP PAD TRUNNION SAG 1", name: "Desbloqueo de equipo", start: d(17,18,30), end: d(17,19,0), resp: "Sergio Rojas" },
 
   //FLOTACION - CAMBIO V/V SFR 34
   { area: "Flotacion", id: "263", ot: "798900", parent: "FLOTACION / CAMBIO V/V SFR 34", name: "Aislación y bloqueo de flujo", start: d(17,9,0), end: d(17,9,30), resp: "Sebastian Elgueta" },
@@ -211,18 +210,18 @@ const INITIAL_TASKS_DATA = [
 //FLOTACION - CAMBIO REDUCTOR FTR 60
   { area: "Flotacion", id: "277", ot: "798901", parent: "FLOTACION / CAMBIO REDUCTOR FTR 60", name: "Bloqueo de equipo", start: d(17,9,0), end: d(17,9,30), resp: "Sebastian Elgueta" },
   { area: "Flotacion", id: "279", ot: "798901", parent: "FLOTACION / CAMBIO REDUCTOR FTR 60", name: "Retiro instrumentación / desconexión", start: d(17,10,30), end: d(17,12,30), resp: "Sebastian Elgueta" },
-  { area: "Flotacion", id: "290", ot: "-", parent: "FLOTACION / CAMBIO REDUCTOR FTR 60", name: "Desbloqueo", start: d(18,6,30), end: d(18,7,0), resp: "Sebastian Elgueta" },
-  { area: "Flotacion", id: "291", ot: "-", parent: "FLOTACION / CAMBIO REDUCTOR FTR 60", name: "Prueba de sentido de giro", start: d(18,7,0), end: d(18,7,30), resp: "Sebastian Elgueta" },
+  { area: "Flotacion", id: "290", ot: "798901", parent: "FLOTACION / CAMBIO REDUCTOR FTR 60", name: "Desbloqueo", start: d(18,6,30), end: d(18,7,0), resp: "Sebastian Elgueta" },
+  { area: "Flotacion", id: "291", ot: "798901", parent: "FLOTACION / CAMBIO REDUCTOR FTR 60", name: "Prueba de sentido de giro", start: d(18,7,0), end: d(18,7,30), resp: "Sebastian Elgueta" },
   
 //FLOTACION - CAMBIO DUCTO SUCCIÓN BOMBA 141
-  { area: "Flotacion", id: "293", ot: "-", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 141", name: "Bloqueo", start: d(17,8,0), end: d(17,9,0), resp: "Sebastian Elgueta" },
-  { area: "Flotacion", id: "295", ot: "-", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 141", name: "Desbloqueo", start: d(17,12,0), end: d(17,13,0), resp: "Sebastian Elgueta" },
-  { area: "Flotacion", id: "296", ot: "-", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 141", name: "Pruebas operacionales", start: d(17,13,0), end: d(17,13,30), resp: "Sebastian Elgueta" },
+  { area: "Flotacion", id: "293", ot: "801616", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 141", name: "Bloqueo", start: d(17,8,0), end: d(17,9,0), resp: "Sebastian Elgueta" },
+  { area: "Flotacion", id: "295", ot: "801616", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 141", name: "Desbloqueo", start: d(17,12,0), end: d(17,13,0), resp: "Sebastian Elgueta" },
+  { area: "Flotacion", id: "296", ot: "801616", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 141", name: "Pruebas operacionales", start: d(17,13,0), end: d(17,13,30), resp: "Sebastian Elgueta" },
 
-//FLOTACION - CAMBIO DUCTO SUCCIÓN BOMBA 141
-  { area: "Flotacion", id: "298", ot: "-", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 142", name: "Bloqueo", start: d(17,13,30), end: d(17,14,30), resp: "Sebastian Elgueta" },
-  { area: "Flotacion", id: "300", ot: "-", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 142", name: "Desbloqueo", start: d(17,17,30), end: d(17,18,30), resp: "Sebastian Elgueta" },
-  { area: "Flotacion", id: "301", ot: "-", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 142", name: "Pruebas operacionales", start: d(17,18,30), end: d(17,19,0), resp: "Sebastian Elgueta" },    
+//FLOTACION - CAMBIO DUCTO SUCCIÓN BOMBA 142
+  { area: "Flotacion", id: "298", ot: "801618", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 142", name: "Bloqueo", start: d(17,13,30), end: d(17,14,30), resp: "Sebastian Elgueta" },
+  { area: "Flotacion", id: "300", ot: "801618", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 142", name: "Desbloqueo", start: d(17,17,30), end: d(17,18,30), resp: "Sebastian Elgueta" },
+  { area: "Flotacion", id: "301", ot: "801618", parent: "CAMBIO DUCTO SUCCIÓN BOMBA 142", name: "Pruebas operacionales", start: d(17,18,30), end: d(17,19,0), resp: "Sebastian Elgueta" },    
 ].map(t => ({
   ...t,
   status: 'pending' as const,
