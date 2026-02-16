@@ -41,7 +41,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // NOMBRE DE LA COLECCIÓN (V30: Version Con todas als OTs)
-const COLLECTION_NAME = "tasks_prod_v29";
+const COLLECTION_NAME = "tasks_prod_v30";
 
 // --- 2. CONFIGURACIÓN DE FECHAS (FIX ZONA HORARIA ROBUSTO) ---
 
